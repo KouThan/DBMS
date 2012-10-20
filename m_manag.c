@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "memory_management.h"
+#include "mem_man.h"
 
 
 
