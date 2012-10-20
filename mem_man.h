@@ -26,7 +26,7 @@
 #define TRUE 1
 #define FALSE 0
 #define EMPTY -1 //gia na doume an enas pinakas einai kenos i oxi|einai swsto i oxi?
-
+//Allages By Nickolaos Koroniotis bitchessssssssssss
 typedef struct cacheBlock cacheBlock;
 typedef struct openFiles openFilesInfo;
 
