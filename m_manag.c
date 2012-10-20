@@ -136,7 +136,7 @@ int BL_DestroyFile(char *filename) {
         return BLE_FILENEXIST;
 }
 
-int BL_OpenFile(char *filename) {
+int BL_OpenFile(char *filename) {//Function that opens a file the name of witch is given as a parameter if possible
     int i,j;
     FILE* fileHandler;
     if(FileExists(filename)){
