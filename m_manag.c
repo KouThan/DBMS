@@ -17,7 +17,24 @@ int BL_init(void) {
         }                            
     }
 }
-
+int WriteToAppOpenings(){//Function that returns the first empty part of appOpenings array
+    int i;
+    for(i=0;i<openingSize;i++){
+        if(appOpenings[i]==-1){
+            return i;
+        }
+    }
+    return EMPTY;
+}
+int WriteToOpenFile(){//Function that returns the first empty part of appOpenings array
+    int i;
+    for(i=0;i<openingSize;i++){
+        if(OpenFile[i].fileHandler==NULL){
+            return i;
+        }
+    }
+    return EMPTY;
+}
 int FileExists(char* filename){  //ELEGXOS IPARXIS ARXEIOU
     FILE * file=fopen(filename,"r"); 
     if(file==NULL){
@@ -30,7 +47,32 @@ int FileExists(char* filename){  //ELEGXOS IPARXIS ARXEIOU
         return TRUE;   
     }
 }
+int GetFilenamPositon(char *filename){
+    int i,j;
+    int counter; //METRITIS GIA DIEUKOLINSI
+    for(i=0;i<openingSize;i++){
+        counter=0;
+        for(j=0;j<FileNameLength;j++){
+            if((OpenFile[i].fileName[j]!=filename[j])){  //ELEGXOS XARAKTIRA-XARAKTIRA
+              
+                counter++;
+            }
+            if((counter>0)||((filename[j]==EOF)&&(OpenFile[i].fileName[j]==filename[j])){
+                break;
+            }
+            else if(((filename[j]==EOF)||(OpenFile[i].fileName[j]==EOF))&&(OpenFile[i].fileName[j]!=filename[j]){
+                counter=2; 
+                break;    
+            }
+            
+        }
+        if(counter==0){
+                return i;
+        }        
+    }
+    return EMPTY;
 
+}
 int FileIsOpen(char *filename){  //ELEGXOS GIA ANOIXTO ARXEIO
     int i,j;
     int counter; //METRITIS GIA DIEUKOLINSI
@@ -95,7 +137,40 @@ int BL_DestroyFile(char *filename) {
 }
 
 int BL_OpenFile(char *filename) {
-    
+    int i,j;
+    FILE* fileHandler;
+    if(FileExists(filename)){
+        if(FileIsOpen(filename)){
+            if((i=WriteToAppOpenings())!=EMPTY){                                            
+                appOpenings[i]=GetFilenamPositon(filename);
+                return i;
+            }        
+            else{
+                 return BLE_OFTABFULL;               
+            }
+        }
+        else{        
+             if((i=WriteToOpenFile())!=EMPTY){
+                 fileHandler=fopen(filename,"r");        
+                 OpenFile[i].fileHandler=fileHandler;
+                 for(j=0;j<FileNameLength;j++){                
+                     OpenFile[i].fileName[j]=filename[j];
+                 }
+                 for(j=0;j<blockSize;j++){
+                     OpenFile[i].byteMap[j]=fgetc(fileHandler);
+                 }            
+             } 
+             else{
+                 return BLE_OFTABFULL;               
+             } 
+             if((i=WriteToAppOpenings())!=EMPTY){                                            
+                 appOpenings[i]=GetFilenamPositon(filename);
+                 return i;
+             }
+             else{
+                 return BLE_OFTABFULL;               
+            }     
+        }    
 }
 
 int BL_CloseFile(int openDesc) {
