@@ -153,7 +153,10 @@ int BL_OpenFile(char *filename) {//Function that opens a file the name of witch 
              if((i=WriteToOpenFile())!=EMPTY){
                  fileHandler=fopen(filename,"r");        
                  OpenFile[i].fileHandler=fileHandler;
-                 for(j=0;j<FileNameLength;j++){                
+                 for(j=0;j<FileNameLength;j++){      
+                     if(filename[j]==EOF){
+                         break;
+                     }          
                      OpenFile[i].fileName[j]=filename[j];
                  }
                  for(j=0;j<blockSize;j++){
