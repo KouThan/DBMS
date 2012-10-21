@@ -4,6 +4,7 @@
 
 
 
+
 int BL_init(void) { 
     int i,j;
     for(i=0;i<openingSize;i++){ 
@@ -17,6 +18,38 @@ int BL_init(void) {
         }                            
     }
 }
+int UpdateFiles(int openFilesPointer){
+    int i;
+    for(i=0;i<openingSize;i++){
+        if(CacheArray[i].fileNamePointer==openFilesPointer){
+            if(CacheArray[i].modified==TRUE){
+                    fseek(OpenFile[CacheArray[i].fileNamePointer].fileHnadler,(OpenFile[CacheArray[i].fileNamePointer].ID)*blockSize,SEEK_SET);
+                    for(j=0;j<blockSize;j++){
+                        fputc(CacheArray[i].data[j],OpenFile[CacheArray[i].fileNamePointer].fileHnadler);
+                    }
+            }
+            
+        }
+    }
+   
+    return BLE_OK;
+}
+int TraverseCacheForModify(int openFilesPointer){//Function that traverses Cache Array and Checks if a specific file's blocks have been modified
+    int i;
+    for(i=0;i<openingSize;i++){
+        if(CacheArray[i].fileNamePointer==openFilesPointer){
+            if(CacheArray[i].modified==TRUE){
+                    return TRUE;
+                
+            }
+            
+        }
+    }
+   
+    return FALSE;
+
+}
+
 int TraverseCacheForClose(int openFilesPointer){//Function that traverses Cache Array and Checks if a specific file's blocks are in use
     int i,j;
     int counter=0;
@@ -30,7 +63,7 @@ int TraverseCacheForClose(int openFilesPointer){//Function that traverses Cache 
             
         }
     }
-    OpenFiles[openFilesPointer].fileHandler=NULL;
+   
     return TRUE;
 
 }
@@ -42,6 +75,7 @@ void removeFileFromCurentUse(int openFilesPointer]){//Function that removes a fi
             CacheArray[i].ID=EMPTY;
         }
     }
+    OpenFile[openFilesPointer].fileHandler=NULL;
     
 }
 
@@ -216,13 +250,14 @@ int BL_CloseFile(int openDesc) {
                     return BLE_BLOCKUNFIXED;
                 }
                 else if(CacheArray[i].pins[openDesc]==TRUE){
-                    CacheArray[i].pins[openDesc]=FALSE;
-                    
-                   
+                    CacheArray[i].pins[openDesc]=FALSE;                  
                 }
             }
         }
         if(TraverseCacheForClose(appOpenings[openDesc])){
+            if(TraverseCacheForModify(appOpenings[openDesc])){//ELEGXOUME AN EGINAN MODIFY TA DATA
+                UpdateFiles(appOpenings[openDesc]);//KANOUME UPDATE TO KATALILO FILE
+            }
             removeFileFromCurentUse(appOpenings[openDesc]);
            
         }
