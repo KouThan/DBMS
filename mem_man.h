@@ -50,7 +50,7 @@ struct openFiles{
 
 int appOpenings[openingSize]; //app-openings array
 
-openFilesInfo OpenFile[blockSize]; //open files array
+openFilesInfo OpenFile[blockSize]; //open files array (alaxte to megethos)
 
 cacheBlock CacheArray[openingSize];
 

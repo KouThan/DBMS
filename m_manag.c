@@ -17,6 +17,34 @@ int BL_init(void) {
         }                            
     }
 }
+int TraverseCacheForClose(int openFilesPointer){//Function that traverses Cache Array and Checks if a specific file's blocks are in use
+    int i,j;
+    int counter=0;
+    for(i=0;i<openingSize;i++){
+        if(CacheArray[i].fileNamePointer==openFilesPointer){
+            for(j=0;j<openingSize;j++){
+                if(CacheArray[i].pins[j]==TRUE){
+                    return FALSE;
+                }
+            }
+            
+        }
+    }
+    OpenFiles[openFilesPointer].fileHandler=NULL;
+    return TRUE;
+
+}
+void removeFileFromCurentUse(int openFilesPointer]){//Function that removes a files blocks and 
+    int i;
+    for(i=0;i<openingSize;i++){
+        if(CacheArray[i].fileNamePointer==openFilesPointe){
+            CacheArray[i].fileNamePointer=EMPTY;
+            CacheArray[i].ID=EMPTY;
+        }
+    }
+    
+}
+
 int WriteToAppOpenings(){//Function that returns the first empty part of appOpenings array
     int i;
     for(i=0;i<openingSize;i++){
@@ -177,6 +205,29 @@ int BL_OpenFile(char *filename) {//Function that opens a file the name of witch 
 }
 
 int BL_CloseFile(int openDesc) {
+    int i;
+    if(appOpenings[openDesc]==EMPTY){
+        return BLE_FD;
+    }
+    else{
+        for(i=0;i<openingSize;i++){
+            if(CacheArray[i].fileNamePointer==appOpenings[openDesc]){
+                if(CacheArray[i].pins[openDesc]==FALSE){
+                    return BLE_BLOCKUNFIXED;
+                }
+                else if(CacheArray[i].pins[openDesc]==TRUE){
+                    CacheArray[i].pins[openDesc]=FALSE;
+                    
+                   
+                }
+            }
+        }
+        if(TraverseCacheForClose(appOpenings[openDesc])){
+            removeFileFromCurentUse(appOpenings[openDesc]);
+           
+        }
+    }
+    return BLE_OK;
     
 }
 
