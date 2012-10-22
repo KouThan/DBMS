@@ -75,6 +75,7 @@ void removeFileFromCurentUse(int openFilesPointer]){//Function that removes a fi
             CacheArray[i].ID=EMPTY;
         }
     }
+    fclose(OpenFile[openFilesPointer].fileHandler);
     OpenFile[openFilesPointer].fileHandler=NULL;
     
 }
