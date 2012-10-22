@@ -269,6 +269,15 @@ int BL_CloseFile(int openDesc) {
 
 int BL_GetFirstBlock(int openDesc) {
     
+        int i=0;
+    while(i<blockSize) {
+        if(openFiles.byteMap[i]==1) {
+            break;
+        }
+    )
+    appOpenings[openDesc]=i;
+    return i;
+ 
 }
 
 int BL_GetNextBlock(int openDesc, int blockNum) {
