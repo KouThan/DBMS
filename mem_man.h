@@ -20,6 +20,7 @@
 #define BLE_FILENERASE -16 //"
 #define BLE_FILENOPEN -17  //"
 #define BLE_FILENEXIST -18  //"
+#define BLE_NONEXTFILE -19
 #define FileNameLength 20
 #define blockSize 1024
 #define openingSize 20

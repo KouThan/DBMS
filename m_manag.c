@@ -269,19 +269,24 @@ int BL_CloseFile(int openDesc) {
 
 int BL_GetFirstBlock(int openDesc) {
     
-        int i=0;
-    while(i<blockSize) {
-        if(openFiles.byteMap[i]==1) {
-            break;
-        }
-    )
-    appOpenings[openDesc]=i;
-    return i;
+    return BL_GetNextBlock(openDesc,0);
+        
  
 }
 
 int BL_GetNextBlock(int openDesc, int blockNum) {
     
+    while(i<blockSize) {
+        if(openFiles.byteMap[blockNum]==1) {
+            break;
+            i++;
+            if (blockNum>1024) {
+                return BLE_NONEXTFILE;
+            }
+        }
+        )
+        appOpenings[openDesc]=blockNum;
+        return blockNum;
 }
 
 int BL_BeginBlock(int openDesc, int blockNum, char **blockBuf) {
