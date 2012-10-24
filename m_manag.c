@@ -268,25 +268,25 @@ int BL_CloseFile(int openDesc) {
 }
 
 int BL_GetFirstBlock(int openDesc) {
-    
-    return BL_GetNextBlock(openDesc,0);
         
- 
+    return BL_GetNextBlock(openDesc,0);  //uses get next block for finding the first one (isos na thelei -1)
+        
 }
-
-int BL_GetNextBlock(int openDesc, int blockNum) {
     
-    while(i<blockSize) {
-        if(openFiles.byteMap[blockNum]==1) {
-            break;
-            i++;
-            if (blockNum>1024) {
-                return BLE_NONEXTFILE;
-            }
-        }
-        )
-        appOpenings[openDesc]=blockNum;
-        return blockNum;
+int BL_GetNextBlock(int openDesc, int blockNum) {
+        
+        
+    while(TRUE) {
+        if (blockNum>=blockSize)
+            return BLE_NONEXTFILE;
+            
+        blockNum++;
+        if(OpenFile[openDesc].byteMap[blockNum]==ValidB)  //elegxei to bytemap gia to arxeio
+            return blockNum;                              //kai na doume an arxikopoioume kapou to bytemap.
+            
+        
+        
+    }
 }
 
 int BL_BeginBlock(int openDesc, int blockNum, char **blockBuf) {
