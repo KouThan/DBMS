@@ -21,12 +21,14 @@
 #define BLE_FILENOPEN -17  //"
 #define BLE_FILENEXIST -18  //"
 #define BLE_NONEXTFILE -19
+#define BLE_FILEFULL -20 //Define gia tin AllocateBlock
 #define FileNameLength 20
 #define blockSize 1024
 #define openingSize 20
 #define TRUE 1
 #define FALSE 0
 #define EMPTY -1 //gia na doume an enas pinakas einai kenos i oxi|einai swsto i oxi?
+#define ValidB '*'
 
 typedef struct cacheBlock cacheBlock;
 typedef struct openFiles openFilesInfo;

@@ -166,7 +166,7 @@ int FileIsOpen(char *filename){  //ELEGXOS GIA ANOIXTO ARXEIO
 int BL_CreateFile(char *filename) {
     FILE * file;
     if(FileExists(filename)==FALSE){
-        file=fopen(filename,"w");
+        file=fopen(filename,"a");//To ekana apo "w" se "a"
         int i;
         for(i=0;i<blockSize;i++){
             fputc(NULL,file);  //ARXIKOPOISI TOU BLOCK HEADER
@@ -294,10 +294,51 @@ int BL_BeginBlock(int openDesc, int blockNum, char **blockBuf) {
 }
 
 int BL_AllocateBlock(int openDesc) {
+    int i,j;
+    for(i=0;i<blockSize;i++){
+        if(OpenFile[openDesc].bytemap[i]==NULL){
+            if(i!=(blockSize-1){
+                                
+                if(OpenFile[openDesc].bytemap[i+1]==ValidB){//check ti na valw dw anti gia true
+                   OpenFile[openDesc].bytemap[i]=ValidB;
+                   return i;
+                }
+                else if(OpenFile[openDesc].bytemap[i+1]==NULL){//to i+1 parakatw paei epidi praktika den metrame to header block stis xrisimes plirofories kai to arxio mas thane 1025 KBytes praktika
+                    fseek(OpenFile[openDesc].fileHandler,(i+1)*1024,SEEK_SET);//paizi na prepei na elegxoume kai gia lathei kai aftes edw...(tis fseek();
+                    for(j=0;j<blockSize;j++){
+                        fputc(NULL,OpenFile[openDesc].fileHandler);
+                    }
+                    OpenFile[openDesc].bytemap[i]=ValidB;
+                    return i;
+                }
+            }
+            else{
+                 fseek(OpenFile[openDesc].fileHandler,0,SEEK_END);
+                 for(j=0;j<blockSize;j++){
+                     fputc(NULL,OpenFile[openDesc].fileHandler);
+                 }
+                 OpenFile[openDesc].bytemap[i]=ValidB;
+                 return i;
+                
+            }
+            
+        }
+    }
+    return BLE_FILEFULL;
     
 }
 
 int BL_DisposeBlock(int openDesc, int blockNum) {
+    int i;
+    for(i=0;i<openingSize;i++){
+        if(CacheArray[i].fileNamePointer==openDesc){
+            if(CacheArray[i].ID==blockNum){
+                return BLE_BLOCKFIXED;
+            }
+        }
+    }
+    openFile[openDesc].byteMap[blockNum]=NULL;
+    return BLE_OK;
     
 }
 
