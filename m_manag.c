@@ -13,17 +13,19 @@ int BL_init(void) {
         CacheArray[i].modified=NULL;
         CacheArray[i].fileNamePointer=EMPTY;
         CacheArray[i].ID=EMPTY;
+        CacheArray[i].timeStamp=EMPTY;
         for(j=0;j<openingSize;j++){
             CacheArray[i].pins[j]=EMPTY;
         }                            
     }
+    timeCounter=FALSE;
 }
 int UpdateFiles(int openFilesPointer){//kanei afto pou leei
     int i;
     for(i=0;i<openingSize;i++){
         if(CacheArray[i].fileNamePointer==openFilesPointer){
             if(CacheArray[i].modified==TRUE){
-                    fseek(OpenFile[CacheArray[i].fileNamePointer].fileHnadler,(OpenFile[CacheArray[i].fileNamePointer].ID)*blockSize,SEEK_SET);
+                    fseek(OpenFile[CacheArray[i].fileNamePointer].fileHnadler,(OpenFile[CacheArray[i].fileNamePointer].ID+1)*blockSize,SEEK_SET);
                     for(j=0;j<blockSize;j++){
                         fputc(CacheArray[i].data[j],OpenFile[CacheArray[i].fileNamePointer].fileHnadler);
                     }
@@ -49,6 +51,17 @@ int TraverseCacheForModify(int openFilesPointer){//Function that traverses Cache
     return FALSE;
 
 }
+int TraverseCacheForEmptyBlock(){
+    int i;
+    for(i=0;i<openingSize;i++){
+        if(CacheArray[i].ID==EMPTY){
+           return i;            
+        }
+    }
+   
+    return EMPTY;
+
+}
 
 int TraverseCacheForClose(int openFilesPointer){//Function that traverses Cache Array and Checks if a specific file's blocks are in use
     int i,j;
@@ -67,6 +80,22 @@ int TraverseCacheForClose(int openFilesPointer){//Function that traverses Cache 
     return TRUE;
 
 }
+
+int TraverseCacheForBlock(int openFilesPointer,int ID,char* fileName){//Function that traverses Cache Array and Checks if a specific file's blocks are in use
+    int i;
+    //int counter=0;
+    for(i=0;i<openingSize;i++){
+        if(compareStrings(CacheArray[i].FileName,fileName)){
+           if(CacheArray[i].ID==ID){
+               return i;
+           }
+            
+        }
+    }
+   
+    return EMPTY;
+
+}
 void removeFileFromCurentUse(int openFilesPointer]){//Function that removes a files blocks and 
     int i;
     for(i=0;i<openingSize;i++){
@@ -78,6 +107,35 @@ void removeFileFromCurentUse(int openFilesPointer]){//Function that removes a fi
     fclose(OpenFile[openFilesPointer].fileHandler);
     OpenFile[openFilesPointer].fileHandler=NULL;
     
+}
+
+int LRU(){
+    int i,j,k,position;
+    int counter;
+    for(i=0;i<openingSize;i++){
+        counter=0;
+        for(j=0;j<openingSize;j++){
+            if(CacheArray[i].pins[j]!=EMPTY){
+                counter++;
+                break;
+            }
+        
+        }
+        if(counter==0){
+            long int minTimeStamp=timeCounter;
+             
+            for(k=0;k<openingSize;k++){
+                if(minTimeStamp>CacheArray[k].timeStamp){
+                    minTimeStamp=CacheArray[k].timeStamp;
+                    position=k;
+                }
+            
+            }
+            return position;
+        }
+        
+    }
+    return BLE_NOMEM;
 }
 
 int WriteToAppOpenings(){//Function that returns the first empty part of appOpenings array
@@ -110,12 +168,36 @@ int FileExists(char* filename){  //ELEGXOS IPARXIS ARXEIOU
         return TRUE;   
     }
 }
+int compareStrings(char* fileName1,char* filaName2){
+     int j;
+     int counter=0;
+     for(j=0;j<FileNameLength;j++){
+            if((fileName1[j]!=fileName2[j])){  //ELEGXOS XARAKTIRA-XARAKTIRA
+              
+                counter++;
+            }
+            if((counter>0)||((fileName1[j]==EOF)&&(fileName1[j]==fileName2[j]))){
+                break;
+            }
+            else if(((fileName2[j]==EOF)||(fileName1[j]==EOF))&&(fileName1[j]!=fileName2[j])){
+                counter=2; 
+                break;    
+            }            
+        }
+        if(counter!=0){
+            return FALSE;
+        }
+        else{
+            return TRUE;
+        }
+}
+
 int GetFilenamPositon(char *filename){
     int i,j;
-    int counter; //METRITIS GIA DIEUKOLINSI
+  //  int counter; //METRITIS GIA DIEUKOLINSI
     for(i=0;i<openingSize;i++){
-        counter=0;
-        for(j=0;j<FileNameLength;j++){
+      //  counter=0;
+       /* for(j=0;j<FileNameLength;j++){
             if((OpenFile[i].fileName[j]!=filename[j])){  //ELEGXOS XARAKTIRA-XARAKTIRA
               
                 counter++;
@@ -128,7 +210,8 @@ int GetFilenamPositon(char *filename){
                 break;    
             }
             
-        }
+        }*/
+        compareStrings(filename,OpenFile[i].fileName)
         if(counter==0){
                 return i;
         }        
@@ -136,6 +219,7 @@ int GetFilenamPositon(char *filename){
     return EMPTY;
 
 }
+
 int FileIsOpen(char *filename){  //ELEGXOS GIA ANOIXTO ARXEIO
     int i,j;
     int counter; //METRITIS GIA DIEUKOLINSI
@@ -281,7 +365,7 @@ int BL_GetNextBlock(int openDesc, int blockNum) {
             return BLE_NONEXTFILE;
             
         blockNum++;
-        if(OpenFile[openDesc].byteMap[blockNum]==ValidB)  //elegxei to bytemap gia to arxeio
+        if(OpenFile[appOpenings[openDesc]].byteMap[blockNum]==ValidB)  //elegxei to bytemap gia to arxeio
             return blockNum;                              //kai na doume an arxikopoioume kapou to bytemap.
             
         
@@ -289,7 +373,61 @@ int BL_GetNextBlock(int openDesc, int blockNum) {
     }
 }
 
+void initBlock(int openDesc, int blockNum,int cacheArrayPosition){
+    int i;
+    CacheArray[cacheArrayPosition].fileNamePointer=appOpenings[openDesc];
+    CacheArray[cacheArrayPosition].ID=blockNum;
+    for(i=0;i<openingSize;i++){
+        CacheArray[cacheArrayPosition].FileName[i]=OpenFile[appOpenings[openDesc]].fileName[i];
+    }
+    CacheArray[cacheArrayPosition].modified=FALSE;
+    CacheArray[cacheArrayPosition].pins[openDesc]=TRUE;
+    fseek(OpenFile[appOpenings[openDesc]].fileHandler,(blockNum+1)*blockSize,SEEK_SET);
+    for(i=0;i<blockSize;i++){
+        CacheArray[cacheArrayPosition].data[i]=fgetc(OpenFile[appOpenings[openDesc]].fileHandler);
+    }
+    CacheArray[cacheArrayPosition].timeStamp=timeCounter;
+    ++timeCounter; 
+}
+
 int BL_BeginBlock(int openDesc, int blockNum, char **blockBuf) {
+    int i,j;
+    if((i=TraverseCacheForBlock(OpenFile[openDesc],blockNum,OpenFile[openDesc].fileName))!=EMPTY){
+        *blockBuf=CacheArray[i].data;
+        for(j=0;j<openingSize;j++){
+            if(CacheArray[i].pins[j]==EMPTY){
+                CacheArray[i].pins[j]=openDesc;
+            }
+        }
+        return BLE_OK;
+    }
+    else{
+        if(OpenFile[appOpenings[openDesc]].byteMap[blockNum]==ValidB){
+                                                         
+            if((j=TraverseCacheForEmptyBlock())!=EMPTY){
+                initBlock(openDesc,blockNum,j);
+                *blockBuf=CacheArray[j].data;
+                return BLE_OK;                
+            }
+            else{
+                if((i=LRU())==BLE_NOMEM){
+                    
+                    return i;
+                }
+                else{
+                     
+                    initBlock(openDesc,blockNum,i);
+                    *blockBuf=CacheArray[j].data;
+                    return  BLE_OK;                  
+                }
+               
+            }
+        }
+        else{
+            return BLE_INVALIDBLOCK;
+        }
+        
+    }
     
 }
 
@@ -304,7 +442,7 @@ int BL_AllocateBlock(int openDesc) {
                    return i;
                 }
                 else if(OpenFile[openDesc].bytemap[i+1]==NULL){//to i+1 parakatw paei epidi praktika den metrame to header block stis xrisimes plirofories kai to arxio mas thane 1025 KBytes praktika
-                    fseek(OpenFile[openDesc].fileHandler,(i+1)*1024,SEEK_SET);//paizi na prepei na elegxoume kai gia lathei kai aftes edw...(tis fseek();
+                    fseek(OpenFile[openDesc].fileHandler,(i+1)*blockSize,SEEK_SET);//paizi na prepei na elegxoume kai gia lathei kai aftes edw...(tis fseek();
                     for(j=0;j<blockSize;j++){
                         fputc(NULL,OpenFile[openDesc].fileHandler);
                     }

@@ -40,6 +40,8 @@ struct cacheBlock{
        int ID;  //anagnwristiko gia to block
        int fileNamePointer; //gia onoma arxeiou
        int modified; //modified int gia 0 i 1
+       char FileName[openingSize];//Onoma arxeiou
+       long int timeStamp;
 
 };// struct gia ta block tis cache
 
@@ -50,6 +52,8 @@ struct openFiles{
        FILE *fileHandler;  //handler 
 
 };// struct gia ta openfiles
+
+long int timeCounter;
 
 int appOpenings[openingSize]; //app-openings array
 
