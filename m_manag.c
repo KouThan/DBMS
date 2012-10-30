@@ -33,7 +33,7 @@ int UpdateFiles(int openFilesPointer){//kanei afto pou leei
             
         }
     }
-   
+    
     return BLE_OK;
 }
 int TraverseCacheForModify(int openFilesPointer){//Function that traverses Cache Array and Checks if a specific file's blocks have been modified
@@ -135,6 +135,7 @@ int LRU(){
         }
         
     }
+    BL_errorNUM=BLE_NOMEM;
     return BLE_NOMEM;
 }
 
@@ -260,6 +261,7 @@ int BL_CreateFile(char *filename) {
     }
         
     else{
+         BL_errorNUM=BLE_FILERROR;
         return BLE_FILERROR;
     }
 }
@@ -274,12 +276,15 @@ int BL_DestroyFile(char *filename) {
                 return BLE_OK;
         
             else
+            BL_errorNUM=BLE_FILENERASE;
                 return  BLE_FILENERASE; 
         } 
         else
+        BL_errorNUM=BLE_FILENOPEN;
             return BLE_FILENOPEN;                      
     }
     else
+    BL_errorNUM=BLE_FILENEXIST;
         return BLE_FILENEXIST;
 }
 
@@ -293,6 +298,7 @@ int BL_OpenFile(char *filename) {//Function that opens a file the name of witch 
                 return i;
             }        
             else{
+                 BL_errorNUM=BLE_OFTABFULL;
                  return BLE_OFTABFULL;               
             }
         }
@@ -311,6 +317,7 @@ int BL_OpenFile(char *filename) {//Function that opens a file the name of witch 
                  }            
              } 
              else{
+                   BL_errorNUM=BLE_OFTABFULL;
                  return BLE_OFTABFULL;               
              } 
              if((i=WriteToAppOpenings())!=EMPTY){                                            
@@ -318,6 +325,7 @@ int BL_OpenFile(char *filename) {//Function that opens a file the name of witch 
                  return i;
              }
              else{
+                   BL_errorNUM=BLE_OFTABFULL;
                  return BLE_OFTABFULL;               
             }     
         }    
@@ -326,12 +334,14 @@ int BL_OpenFile(char *filename) {//Function that opens a file the name of witch 
 int BL_CloseFile(int openDesc) {
     int i;
     if(appOpenings[openDesc]==EMPTY){
+        BL_errorNUM=BLE_FD;
         return BLE_FD;
     }
     else{
         for(i=0;i<openingSize;i++){
             if(CacheArray[i].fileNamePointer==appOpenings[openDesc]){
                 if(CacheArray[i].pins[openDesc]==FALSE){
+                    BL_errorNUM=BLE_BLOCKUNFIXED;
                     return BLE_BLOCKUNFIXED;
                 }
                 else if(CacheArray[i].pins[openDesc]==TRUE){
@@ -361,8 +371,10 @@ int BL_GetNextBlock(int openDesc, int blockNum) {
         
         
     while(TRUE) {
-        if (blockNum>=blockSize)
-            return BLE_NONEXTFILE;
+        if (blockNum>=blockSize){
+            BL_errorNUM=BLE_NONEXTFILE;
+            return BLE_NONEXTFILE;   
+        }
             
         blockNum++;
         if(OpenFile[appOpenings[openDesc]].byteMap[blockNum]==ValidB)  //elegxei to bytemap gia to arxeio
@@ -395,18 +407,19 @@ int BL_BeginBlock(int openDesc, int blockNum, char **blockBuf) {
     if((i=TraverseCacheForBlock(OpenFile[openDesc],blockNum,OpenFile[openDesc].fileName))!=EMPTY){
         *blockBuf=CacheArray[i].data;
         for(j=0;j<openingSize;j++){
-            if(CacheArray[i].pins[j]==EMPTY){
+            if(CacheArray[i].pins[j]==EMPTY){//RE MALAKES CHECK HERE!!!!!!!
                 CacheArray[i].pins[j]=openDesc;
             }
         }
         return BLE_OK;
     }
-    else{
+    else{//RE MALAKES NA KANOUME ENIMEROSI TOU KATALLILOU ARXEIOU...
         if(OpenFile[appOpenings[openDesc]].byteMap[blockNum]==ValidB){
                                                          
             if((j=TraverseCacheForEmptyBlock())!=EMPTY){
                 initBlock(openDesc,blockNum,j);
                 *blockBuf=CacheArray[j].data;
+                BL_errorNUM=BLE_OK;
                 return BLE_OK;                
             }
             else{
@@ -418,12 +431,14 @@ int BL_BeginBlock(int openDesc, int blockNum, char **blockBuf) {
                      
                     initBlock(openDesc,blockNum,i);
                     *blockBuf=CacheArray[j].data;
+                    BL_errorNUM=BLE_OK;
                     return  BLE_OK;                  
                 }
                
             }
         }
         else{
+             BL_errorNUM=BLE_INVALIDBLOCK;
             return BLE_INVALIDBLOCK;
         }
         
@@ -462,6 +477,7 @@ int BL_AllocateBlock(int openDesc) {
             
         }
     }
+    BL_errorNUM=BLE_FILEFULL;
     return BLE_FILEFULL;
     
 }
@@ -471,24 +487,170 @@ int BL_DisposeBlock(int openDesc, int blockNum) {
     for(i=0;i<openingSize;i++){
         if(CacheArray[i].fileNamePointer==openDesc){
             if(CacheArray[i].ID==blockNum){
+                BL_errorNUM=BLE_BLOCKFIXED;
                 return BLE_BLOCKFIXED;
             }
         }
     }
     openFile[openDesc].byteMap[blockNum]=NULL;
+    BL_errorNUM=BLE_OK;
     return BLE_OK;
     
 }
+int NotifyModifiedBlockInFile(int openDesc, int blockNum, int modified){
+    int i,k;
+    int j=0;
+    for(i=0;i<openingSize;i++){
+        if((CacheArray[i].ID==blockNum)&&(compareStrings(CacheArray[i].FileName,openFile[appOpenings[openDesc]].fileName)){
+            k=i;                           
+            if(CacheArray[i].pins[openDesc]==TRUE){
+                j++;
+               break;
+            } 
+        }
+    }
+    if(j!=0){
+        return EMPTY;
+    }
+    else{
+         if(modified==TRUE){
+                            
+            fseek(OpenFile[appOpenings[openDesc]].fileHandler,(blockNum+1)*blockSize,SEEK_SET);
+            for(i=0;i<blockSize;i++){
+                fputc(CacheArray[k].data[i],OpenFile[appOpenings[openDesc]].fileHandler);
+            }
+            return TRUE;
+         }
+         else{
+             return FALSE;
+         }
+    }
+    
+
+
+}
 
 int BL_EndBlock(int openDesc, int blockNum, int modified) {
+    int i,j;
+    for(i=0;i<openingSize;i++){
+
+        if((CacheArray[i].pins[openDesc]==TRUE)&&(CacheArray[i].ID==blockNum)){
+            CacheArray[i].pins[openDesc]=FALSE;
+            if(CacheArray[i].modified!=TRUE){
+                CacheArray[i].modified=modified;
+            }
+            break;
+        }    
+
+    }
+    
     
 }
 
 void BL_PrintError(char *errorString) {
+     printf("%s",errorString);
+     switch(BL_errorNUM){
+         case BLE_NOBUF:
+              printf("No buffer space!");
+              
+              break;
+              
+         case BLE_BLOCKFIXED:
+              printf("Block already pined in Cache!");
+              break;
+              
+         case BLE_BLOCKNOTINBUF:
+              printf("Block is not pined in Cache!");
+              break;
+              
+         case BLE_BLOCKINBUF:
+              printf("Block already in Cache!");
+              break;
+              
+         case BLE_OS:
+              printf("Operating system general error!");
+              break;
+              
+         case BLE_INVALIDBLOCK:
+              printf("Non valid block ID!");
+              break;
+              
+         case BLE_FILEOPEN:
+              printf("File already open!");
+              break;
+         case BLE_FTABFULL:
+              printf("Open file array full!");
+              break;
+              
+         case BLE_OFTABFULL:
+              printf("App openings array full!");
+              break;
+              
+         case BLE_FD:
+              printf("Non valid Open files position!");
+              break;
+              
+         case BLE_EOF:
+              printf("End Of File reached!");
+              break;
+              
+         case BLE_BLOCKFREE:
+              printf("Block already available!");
+              break;
+              
+         case BLE_BLOCKUNFIXED:
+              printf("Block already unpined!");
+              break;
+         case BLE_FILERROR:
+              printf("General file error!");
+              break;
+              
+         case BLE_FILENERASE:
+              printf("File not erased!");
+              break;
+              
+         case BLE_FILENOPEN:
+              printf("File not open!");
+              break;
+              
+         case BLE_FILENEXIST:
+              printf("File does not exist!");
+              break;
+              
+         case BLE_NONEXTFILE:
+              printf("No next block!");
+              break;
+              
+         case BLE_FILEFULL:
+              printf("File is full!");
+              break;
+              
+         case BLE_FILENCLOSEPROPER:
+              printf("File did not close properly!");
+              break;   
+     
+     }
+     
      
 }
 
 int BL_CleanUp(void) {
+    int i;
+    int j=0;
+    for(i=0;i<openingSize;i++)
+    {
+        if(fclose(OpenFile[i].fileHandler)==EOF){
+            j++;
+        }
+    
+    }
+    if(j!=FALSE){
+        BL_errorNUM=BLE_FILENCLOSEPROPER;
+        return BLE_FILENCLOSEPROPER;
+    }
+    else{
+        return BLE_OK;
+    }
     
 }
      
