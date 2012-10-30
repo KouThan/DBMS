@@ -2,26 +2,27 @@
 #define MEMORY_MANAGEMENT_H
 
 #define BLE_OK 0
-#define BLE_NOMEM -1
-#define BLE_NOBUF -2
-#define BLE_BLOCKFIXED -3
-#define BLE_BLOCKNOTINBUF -4
-#define BLE_BLOCKINBUF -5
-#define BLE_OS -6
-#define BLE_INVALIDBLOCK -7
-#define BLE_FILEOPEN -8
-#define BLE_FTABFULL -9
-#define BLE_OFTABFULL -10
-#define BLE_FD -11
-#define BLE_EOF -12
-#define BLE_BLOCKFREE -13
-#define BLE_BLOCKUNFIXED -14
-#define BLE_FILERROR -15  //EXTRA DIKA MAS DEFINE
-#define BLE_FILENERASE -16 //"
-#define BLE_FILENOPEN -17  //"
-#define BLE_FILENEXIST -18  //"
-#define BLE_NONEXTFILE -19
-#define BLE_FILEFULL -20 //Define gia tin AllocateBlock
+#define BLE_NOMEM -10
+#define BLE_NOBUF -20
+#define BLE_BLOCKFIXED -30
+#define BLE_BLOCKNOTINBUF -40
+#define BLE_BLOCKINBUF -50
+#define BLE_OS -60
+#define BLE_INVALIDBLOCK -70
+#define BLE_FILEOPEN -80
+#define BLE_FTABFULL -90
+#define BLE_OFTABFULL -100
+#define BLE_FD -110
+#define BLE_EOF -120
+#define BLE_BLOCKFREE -130
+#define BLE_BLOCKUNFIXED -140
+#define BLE_FILERROR -150  //EXTRA DIKA MAS DEFINE
+#define BLE_FILENERASE -160 //"
+#define BLE_FILENOPEN -170 //"
+#define BLE_FILENEXIST -180  //"
+#define BLE_NONEXTFILE -190
+#define BLE_FILEFULL -200 //Define gia tin AllocateBlock
+#define BLE_FILENCLOSEPROPER -210
 #define FileNameLength 20
 #define blockSize 1024
 #define openingSize 20
@@ -60,6 +61,8 @@ int appOpenings[openingSize]; //app-openings array
 openFilesInfo OpenFile[openingSize]; 
 
 cacheBlock CacheArray[openingSize];
+
+int BL_errorNUM;
 
 
 int BL_init(void);
