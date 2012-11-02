@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "mem_man.h"
+#include "BL.h"
 
 
 
@@ -10,7 +10,7 @@ int BL_init(void) {
     for(i=0;i<openingSize;i++){ 
         appOpenings[i]=EMPTY; 
         OpenFile[i].fileHandler=NULL;   
-        CacheArray[i].modified=NULL;
+        CacheArray[i].modified=(int)NULL;
         CacheArray[i].fileNamePointer=EMPTY;
         CacheArray[i].ID=EMPTY;
         CacheArray[i].timeStamp=EMPTY;
@@ -21,13 +21,13 @@ int BL_init(void) {
     timeCounter=FALSE;
 }
 int UpdateFiles(int openFilesPointer){//kanei afto pou leei
-    int i;
+    int i,j;
     for(i=0;i<openingSize;i++){
         if(CacheArray[i].fileNamePointer==openFilesPointer){
             if(CacheArray[i].modified==TRUE){
-                    fseek(OpenFile[CacheArray[i].fileNamePointer].fileHnadler,(OpenFile[CacheArray[i].fileNamePointer].ID+1)*blockSize,SEEK_SET);
+                    fseek(OpenFile[CacheArray[i].fileNamePointer].fileHandler,(/*OpenFile[*/CacheArray[i]/*.fileNamePointer]*/.ID+1)*blockSize,SEEK_SET);
                     for(j=0;j<blockSize;j++){
-                        fputc(CacheArray[i].data[j],OpenFile[CacheArray[i].fileNamePointer].fileHnadler);
+                        fputc(CacheArray[i].data[j],OpenFile[CacheArray[i].fileNamePointer].fileHandler);
                     }
             }
             
@@ -96,10 +96,10 @@ int TraverseCacheForBlock(int openFilesPointer,int ID,char* fileName){//Function
     return EMPTY;
 
 }
-void removeFileFromCurentUse(int openFilesPointer]){//Function that removes a files blocks and 
+void removeFileFromCurentUse(int openFilesPointer){//Function that removes a files blocks and 
     int i;
     for(i=0;i<openingSize;i++){
-        if(CacheArray[i].fileNamePointer==openFilesPointe){
+        if(CacheArray[i].fileNamePointer==openFilesPointer){
             CacheArray[i].fileNamePointer=EMPTY;
             CacheArray[i].ID=EMPTY;
         }
@@ -169,7 +169,7 @@ int FileExists(char* filename){  //ELEGXOS IPARXIS ARXEIOU
         return TRUE;   
     }
 }
-int compareStrings(char* fileName1,char* filaName2){
+int compareStrings(char* fileName1,char* fileName2){
      int j;
      int counter=0;
      for(j=0;j<FileNameLength;j++){
@@ -212,8 +212,8 @@ int GetFilenamPositon(char *filename){
             }
             
         }*/
-        compareStrings(filename,OpenFile[i].fileName)
-        if(counter==0){
+        
+        if(compareStrings(filename,OpenFile[i].fileName)){
                 return i;
         }        
     }
@@ -231,10 +231,10 @@ int FileIsOpen(char *filename){  //ELEGXOS GIA ANOIXTO ARXEIO
               
                 counter++;
             }
-            if((counter>0)||((filename[j]==EOF)&&(OpenFile[i].fileName[j]==filename[j])){
+            if((counter>0)||((filename[j]==EOF)&&(OpenFile[i].fileName[j]==filename[j]))){
                 break;
             }
-            else if(((filename[j]==EOF)||(OpenFile[i].fileName[j]==EOF))&&(OpenFile[i].fileName[j]!=filename[j]){
+            else if(((filename[j]==EOF)||(OpenFile[i].fileName[j]==EOF))&&(OpenFile[i].fileName[j]!=filename[j])){
                 counter=2; 
                 break;    
             }
@@ -254,7 +254,7 @@ int BL_CreateFile(char *filename) {
         file=fopen(filename,"a");//To ekana apo "w" se "a"
         int i;
         for(i=0;i<blockSize;i++){
-            fputc(NULL,file);  //ARXIKOPOISI TOU BLOCK HEADER
+            fputc((char)NULL,file);  //ARXIKOPOISI TOU BLOCK HEADER
         }
         fclose(file);
         return BLE_OK;
@@ -271,7 +271,7 @@ int BL_CreateFile(char *filename) {
 
 int BL_DestroyFile(char *filename) {
     if(FileExists(filename)==TRUE){
-        if(FileIsOpen()){
+        if(FileIsOpen(filename)){
             if(!remove(filename))  //DIAGRAFI ARXEIOU
                 return BLE_OK;
         
@@ -328,7 +328,8 @@ int BL_OpenFile(char *filename) {//Function that opens a file the name of witch 
                    BL_errorNUM=BLE_OFTABFULL;
                  return BLE_OFTABFULL;               
             }     
-        }    
+        }   
+    } 
 }
 
 int BL_CloseFile(int openDesc) {
@@ -404,7 +405,7 @@ void initBlock(int openDesc, int blockNum,int cacheArrayPosition){
 
 int BL_BeginBlock(int openDesc, int blockNum, char **blockBuf) {
     int i,j;
-    if((i=TraverseCacheForBlock(OpenFile[openDesc],blockNum,OpenFile[openDesc].fileName))!=EMPTY){
+    if((i=TraverseCacheForBlock(/*OpenFile[*/openDesc/*]*/,blockNum,OpenFile[openDesc].fileName))!=EMPTY){
         *blockBuf=CacheArray[i].data;
         for(j=0;j<openingSize;j++){
             if(CacheArray[i].pins[j]==EMPTY){//RE MALAKES CHECK HERE!!!!!!!
@@ -449,28 +450,28 @@ int BL_BeginBlock(int openDesc, int blockNum, char **blockBuf) {
 int BL_AllocateBlock(int openDesc) {
     int i,j;
     for(i=0;i<blockSize;i++){
-        if(OpenFile[openDesc].bytemap[i]==NULL){
-            if(i!=(blockSize-1){
+        if(OpenFile[openDesc].byteMap[i]==(char)NULL){
+            if(i!=(blockSize-1)){
                                 
-                if(OpenFile[openDesc].bytemap[i+1]==ValidB){//check ti na valw dw anti gia true
-                   OpenFile[openDesc].bytemap[i]=ValidB;
+                if(OpenFile[openDesc].byteMap[i+1]==ValidB){//check ti na valw dw anti gia true
+                   OpenFile[openDesc].byteMap[i]=ValidB;
                    return i;
                 }
-                else if(OpenFile[openDesc].bytemap[i+1]==NULL){//to i+1 parakatw paei epidi praktika den metrame to header block stis xrisimes plirofories kai to arxio mas thane 1025 KBytes praktika
+                else if(OpenFile[openDesc].byteMap[i+1]==(char)NULL){//to i+1 parakatw paei epidi praktika den metrame to header block stis xrisimes plirofories kai to arxio mas thane 1025 KBytes praktika
                     fseek(OpenFile[openDesc].fileHandler,(i+1)*blockSize,SEEK_SET);//paizi na prepei na elegxoume kai gia lathei kai aftes edw...(tis fseek();
                     for(j=0;j<blockSize;j++){
-                        fputc(NULL,OpenFile[openDesc].fileHandler);
+                        fputc((char)NULL,OpenFile[openDesc].fileHandler);
                     }
-                    OpenFile[openDesc].bytemap[i]=ValidB;
+                    OpenFile[openDesc].byteMap[i]=ValidB;
                     return i;
                 }
             }
             else{
                  fseek(OpenFile[openDesc].fileHandler,0,SEEK_END);
                  for(j=0;j<blockSize;j++){
-                     fputc(NULL,OpenFile[openDesc].fileHandler);
+                     fputc((char)NULL,OpenFile[openDesc].fileHandler);
                  }
-                 OpenFile[openDesc].bytemap[i]=ValidB;
+                 OpenFile[openDesc].byteMap[i]=ValidB;
                  return i;
                 
             }
@@ -492,7 +493,7 @@ int BL_DisposeBlock(int openDesc, int blockNum) {
             }
         }
     }
-    openFile[openDesc].byteMap[blockNum]=NULL;
+    OpenFile[openDesc].byteMap[blockNum]=(char)NULL;
     BL_errorNUM=BLE_OK;
     return BLE_OK;
     
@@ -501,7 +502,7 @@ int NotifyModifiedBlockInFile(int openDesc, int blockNum, int modified){
     int i,k;
     int j=0;
     for(i=0;i<openingSize;i++){
-        if((CacheArray[i].ID==blockNum)&&(compareStrings(CacheArray[i].FileName,openFile[appOpenings[openDesc]].fileName)){
+        if((CacheArray[i].ID==blockNum)&&(compareStrings(CacheArray[i].FileName,OpenFile[appOpenings[openDesc]].fileName))){
             k=i;                           
             if(CacheArray[i].pins[openDesc]==TRUE){
                 j++;
@@ -652,6 +653,5 @@ int BL_CleanUp(void) {
         return BLE_OK;
     }
     
-}
-     
 
+}
