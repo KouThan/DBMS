@@ -2,15 +2,12 @@
 #include <stdlib.h>
 #include "BL.h"
 
-
-
-
-int BL_init(void) { 
+int BL_Init(void) { 
     int i,j;
     for(i=0;i<openingSize;i++){ 
         appOpenings[i]=EMPTY; 
         OpenFile[i].fileHandler=NULL;   
-        CacheArray[i].modified=(int)NULL;
+        CacheArray[i].modified=FALSE;
         CacheArray[i].fileNamePointer=EMPTY;
         CacheArray[i].ID=EMPTY;
         CacheArray[i].timeStamp=EMPTY;
@@ -20,6 +17,31 @@ int BL_init(void) {
     }
     timeCounter=FALSE;
 }
+
+int compareStrings(char* fileName1,char* fileName2){
+     int j;
+     int counter=0;
+     for(j=0;j<FileNameLength;j++){
+            if((fileName1[j]!=fileName2[j])){  //ELEGXOS XARAKTIRA-XARAKTIRA
+              
+                counter++;
+            }
+            if((counter>0)||((fileName1[j]==EOF)&&(fileName1[j]==fileName2[j]))){
+                break;
+            }
+            else if(((fileName2[j]==EOF)||(fileName1[j]==EOF))&&(fileName1[j]!=fileName2[j])){
+                counter=2; 
+                break;    
+            }            
+        }
+        if(counter!=0){
+            return FALSE;
+        }
+        else{
+            return TRUE;
+        }
+}
+
 int UpdateFiles(int openFilesPointer){//kanei afto pou leei
     int i,j;
     for(i=0;i<openingSize;i++){
@@ -169,29 +191,7 @@ int FileExists(char* filename){  //ELEGXOS IPARXIS ARXEIOU
         return TRUE;   
     }
 }
-int compareStrings(char* fileName1,char* fileName2){
-     int j;
-     int counter=0;
-     for(j=0;j<FileNameLength;j++){
-            if((fileName1[j]!=fileName2[j])){  //ELEGXOS XARAKTIRA-XARAKTIRA
-              
-                counter++;
-            }
-            if((counter>0)||((fileName1[j]==EOF)&&(fileName1[j]==fileName2[j]))){
-                break;
-            }
-            else if(((fileName2[j]==EOF)||(fileName1[j]==EOF))&&(fileName1[j]!=fileName2[j])){
-                counter=2; 
-                break;    
-            }            
-        }
-        if(counter!=0){
-            return FALSE;
-        }
-        else{
-            return TRUE;
-        }
-}
+
 
 int GetFilenamPositon(char *filename){
     int i,j;
