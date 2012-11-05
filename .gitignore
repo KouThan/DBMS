@@ -13,3 +13,9 @@
 *.lai
 *.la
 *.a
+
+#irelevant files
+.dat
+.win
+.layout
+.exe
