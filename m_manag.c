@@ -16,6 +16,7 @@ int BL_Init(void) {
         }                            
     }
     timeCounter=FALSE;
+    return BLE_OK;
 }
 
 int compareStrings(char* fileName1,char* fileName2){
@@ -637,10 +638,10 @@ void BL_PrintError(char *errorString) {
 
 int BL_CleanUp(void) {
     int i;
-    int j=0;
+    int j=FALSE;
     for(i=0;i<openingSize;i++)
     {
-        if(fclose(OpenFile[i].fileHandler)==EOF){
+        if((OpenFile[i].fileHandler!=NULL)&&(fclose(OpenFile[i].fileHandler)==EOF)){
             j++;
         }
     
@@ -650,8 +651,9 @@ int BL_CleanUp(void) {
         return BLE_FILENCLOSEPROPER;
     }
     else{
+         
         return BLE_OK;
-    }
+   }
     
 
 }
