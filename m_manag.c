@@ -334,28 +334,35 @@ int BL_OpenFile(char *filename) {//Function that opens a file the name of witch 
 }
 
 int BL_CloseFile(int openDesc) {
-    int i;
-    if(appOpenings[openDesc]==EMPTY){
+    int i,j;
+    for(j=0;j<openingSize;j++){
+        if(appOpenings[j]==openDesc){
+            printf("\n\t%d arxidia ",appOpenings[j]);
+            break;
+        }
+    }
+    if(appOpenings[j/*openDesc*/]==EMPTY){
         BL_errorNUM=BLE_FD;
         return BLE_FD;
     }
     else{
         for(i=0;i<openingSize;i++){
-            if(CacheArray[i].fileNamePointer==appOpenings[openDesc]){
-                if(CacheArray[i].pins[openDesc]==FALSE){
+            if(CacheArray[i].fileNamePointer==/*appOpenings[i*/openDesc/*]*/){
+                if((appOpenings[i]==openDesc)&&(CacheArray[i].pins[/*openDesc*/i]==FALSE)){
                     BL_errorNUM=BLE_BLOCKUNFIXED;
                     return BLE_BLOCKUNFIXED;
                 }
-                else if(CacheArray[i].pins[openDesc]==TRUE){
-                    CacheArray[i].pins[openDesc]=FALSE;                  
+                else if((appOpenings[i]==openDesc)&&(CacheArray[i].pins[i/*openDesc*/]==TRUE)){
+                    CacheArray[i].pins[openDesc]=FALSE;
+                    j=i;                 
                 }
             }
         }
-        if(TraverseCacheForClose(appOpenings[openDesc])){
-            if(TraverseCacheForModify(appOpenings[openDesc])){//ELEGXOUME AN EGINAN MODIFY TA DATA
-                UpdateFiles(appOpenings[openDesc]);//KANOUME UPDATE TO KATALILO FILE
+        if(TraverseCacheForClose(appOpenings[j/*openDesc*/])){
+            if(TraverseCacheForModify(appOpenings[j/*openDesc*/])){//ELEGXOUME AN EGINAN MODIFY TA DATA
+                UpdateFiles(appOpenings[j/*openDesc*/]);//KANOUME UPDATE TO KATALILO FILE
             }
-            removeFileFromCurentUse(appOpenings[openDesc]);
+            removeFileFromCurentUse(appOpenings[j/*openDesc*/]);
            
         }
     }
@@ -387,15 +394,20 @@ int BL_GetNextBlock(int openDesc, int blockNum) {
     }
 }
 
-void initBlock(int openDesc, int blockNum,int cacheArrayPosition){
-    int i;
-    CacheArray[cacheArrayPosition].fileNamePointer=appOpenings[openDesc];
+void initBlock(int openDesc, int blockNum,int cacheArrayPosition){//allazw ton int pointer gia ta poins giati ton gamisame re Mates
+    int i,j;
+     for(j=0;j<openingSize;j++){
+            if(appOpenings[j]==openDesc){
+                break;
+            }
+        }
+    CacheArray[cacheArrayPosition].fileNamePointer=appOpenings[j];//openDesc];
     CacheArray[cacheArrayPosition].ID=blockNum;
     for(i=0;i<openingSize;i++){
-        CacheArray[cacheArrayPosition].FileName[i]=OpenFile[appOpenings[openDesc]].fileName[i];
+        CacheArray[cacheArrayPosition].FileName[i]=OpenFile[appOpenings[j/*openDesc*/]].fileName[i];
     }
     CacheArray[cacheArrayPosition].modified=FALSE;
-    CacheArray[cacheArrayPosition].pins[openDesc]=TRUE;
+    CacheArray[cacheArrayPosition].pins[j/*openDesc*/]=TRUE;
     fseek(OpenFile[appOpenings[openDesc]].fileHandler,(blockNum+1)*blockSize,SEEK_SET);
     for(i=0;i<blockSize;i++){
         CacheArray[cacheArrayPosition].data[i]=fgetc(OpenFile[appOpenings[openDesc]].fileHandler);
@@ -409,14 +421,14 @@ int BL_BeginBlock(int openDesc, int blockNum, char **blockBuf) {
     if((i=TraverseCacheForBlock(/*OpenFile[*/openDesc/*]*/,blockNum,OpenFile[openDesc].fileName))!=EMPTY){
         *blockBuf=CacheArray[i].data;
         for(j=0;j<openingSize;j++){
-            if(CacheArray[i].pins[j]==EMPTY){//RE MALAKES CHECK HERE!!!!!!!
-                CacheArray[i].pins[j]=openDesc;
+            if((appOpenings[j]==openDesc)&&(CacheArray[i].pins[j/*j openDesc*/]==EMPTY)){//RE MALAKES CHECK HERE!!!!!!!
+                CacheArray[i].pins[j/*openDesc j*/]=TRUE;//openDesc;
             }
         }
         return BLE_OK;
     }
     else{//RE MALAKES NA KANOUME ENIMEROSI TOU KATALLILOU ARXEIOU...
-        if(OpenFile[appOpenings[openDesc]].byteMap[blockNum]==ValidB){
+        if(OpenFile[appOpenings[openDesc/**/]].byteMap[blockNum]==ValidB){
                                                          
             if((j=TraverseCacheForEmptyBlock())!=EMPTY){
                 initBlock(openDesc,blockNum,j);
@@ -426,7 +438,6 @@ int BL_BeginBlock(int openDesc, int blockNum, char **blockBuf) {
             }
             else{
                 if((i=LRU())==BLE_NOMEM){
-                    
                     return i;
                 }
                 else{
@@ -536,8 +547,8 @@ int BL_EndBlock(int openDesc, int blockNum, int modified) {
     int i,j;
     for(i=0;i<openingSize;i++){
 
-        if((CacheArray[i].pins[openDesc]==TRUE)&&(CacheArray[i].ID==blockNum)){
-            CacheArray[i].pins[openDesc]=FALSE;
+        if((CacheArray[i].pins[appOpenings[i]/*openDesc*/]==TRUE)&&(CacheArray[i].ID==blockNum)&&(appOpenings[i]==openDesc)){
+            CacheArray[i].pins[appOpenings[i]/*openDesc*/]=FALSE;
             if(CacheArray[i].modified!=TRUE){
                 CacheArray[i].modified=modified;
             }
@@ -545,6 +556,7 @@ int BL_EndBlock(int openDesc, int blockNum, int modified) {
         }    
 
     }
+    return BLE_OK;
     
     
 }

@@ -5,9 +5,10 @@
 bool WriteStringToBlock(int file_desc, int block, const char *str)
 {
 	char *buffer = 0;
-	if (BL_BeginBlock(file_desc, block, &buffer) != BLE_OK)	return false;
+	if (BL_BeginBlock(file_desc, block, &buffer) != BLE_OK)return false;
+    
 	strcpy(buffer, str);
-	if (BL_EndBlock(file_desc, block, 1) != BLE_OK)	return false;
+	if (BL_EndBlock(file_desc, block, 1) != BLE_OK) return false;
 
 	return true;
 }
