@@ -30,16 +30,16 @@ bool RandomWriteTest()
 			return false;
 		}
 	}
-
 	printf("Allocated 10 blocks in file RandomNumbers.dat\n");
 
 	srand(0);
 
 	int random_counter = 0;
-
+    
 	for (int i=0; i<10; i++)
 	{
 		int curr_block = GetNthBlock(file_desc, i);
+		
 		if (curr_block < 0)
 		{
 			BL_CloseFile(file_desc);
@@ -59,7 +59,7 @@ bool RandomWriteTest()
 			buffer[j] = rand() % 100;
 			random_counter ++;
 		}
-
+		 
 		if (BL_EndBlock(file_desc, curr_block, 1) != BLE_OK)
 		{
 			BL_CloseFile(file_desc);

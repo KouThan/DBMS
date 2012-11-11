@@ -18,7 +18,8 @@ bool FileVerifyDeleteTest()
 		printf("Opened file %s (handle %d)\n", tb, file_handle);
 
 		int *data = NULL;
-		int result = BL_BeginBlock(file_handle, 1, (char**)&data);
+		int result = BL_BeginBlock(file_handle,0, (char**)&data);
+	
 
 		if (result < 0)
 		{
@@ -35,9 +36,9 @@ bool FileVerifyDeleteTest()
 		}
 
 		printf("Data was verified: The block indeed contains the number %d\n", i);
-
-		result = BL_EndBlock(file_handle, 1, 0);
-
+ 
+        
+		result = BL_EndBlock(file_handle,0, 0);
 		if (result < 0)
 		{
 			printf("EndBlock 1 Failed on handle %d, reason: %d\n",
@@ -52,7 +53,7 @@ bool FileVerifyDeleteTest()
 				file_handle, result);
 			return false;
 		}
-
+        
 		printf("File was closed\n");
 	}
 

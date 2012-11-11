@@ -8,7 +8,8 @@ bool VerifyBlockString(int file_desc, int block, const char *str)
 	if (BL_BeginBlock(file_desc, block, &buffer) != BLE_OK)	return false;
 	int result = strcmp(str, buffer);
 	if (BL_EndBlock(file_desc, block, 1) != BLE_OK)	return false;
-
+	
+	
 	return result == 0;
 }
 

@@ -10,34 +10,34 @@
 #define BL_MAX_FILENAME_LEN 256
 
 
-#define BLE_OK 0
-#define BLE_NOMEM -10
-#define BLE_NOBUF -20
-#define BLE_BLOCKFIXED -30
-#define BLE_BLOCKNOTINBUF -40
-#define BLE_BLOCKINBUF -50
-#define BLE_OS -60
-#define BLE_INVALIDBLOCK -70
-#define BLE_FILEOPEN -80
-#define BLE_FTABFULL -90
-#define BLE_OFTABFULL -100
-#define BLE_FD -110
-#define BLE_EOF -120
-#define BLE_BLOCKFREE -130
-#define BLE_BLOCKUNFIXED -140
-#define BLE_FILERROR -150  //EXTRA DIKA MAS DEFINE
-#define BLE_FILENERASE -160 //"
-#define BLE_FILENOPEN -170 //"
-#define BLE_FILENEXIST -180  //"
-#define BLE_NONEXTFILE -190
-#define BLE_FILEFULL -200 //Define gia tin AllocateBlock
-#define BLE_FILENCLOSEPROPER -210
+#define BLE_OK 0  //OK
+#define BLE_NOMEM -10  //elleipsi mnimis
+#define BLE_NOBUF -20  //elleipsi xwrou endiamesis mnimis
+#define BLE_BLOCKFIXED -30  //block idi karfwmeno sti mnimi
+#define BLE_BLOCKNOTINBUF -40  //block gia xsekarfwma den einai sti mnimi
+#define BLE_BLOCKINBUF -50  //block idi sti mnimi
+#define BLE_OS -60  //geniko sfalma Leitourgikou
+#define BLE_INVALIDBLOCK -70  //mi egkiro block ID
+#define BLE_FILEOPEN -80  //arxeio idi anoixto
+#define BLE_FTABFULL -90  //lista anoixtwn arxeiwn pliris
+#define BLE_OFTABFULL -100  //lista anoigmatwn arxeiwn pliris
+#define BLE_FD -110  //mi egkiro block ID
+#define BLE_EOF -120  //telso arxeiou
+#define BLE_BLOCKFREE -130  //block idi diathesimo
+#define BLE_BLOCKUNFIXED -140  //block idi xsekarfwmeno
+#define BLE_FILERROR -150  //dika mas define - extra
+#define BLE_FILENERASE -160  // -- " --
+#define BLE_FILENOPEN -170 // -- " --
+#define BLE_FILENEXIST -180  // -- " --
+#define BLE_NONEXTFILE -190  // -- " --
+#define BLE_FILEFULL -200  //gia AllocateBlock
+#define BLE_FILENCLOSEPROPER -210  // -- " --
 #define FileNameLength 20
 #define blockSize 1024
 #define openingSize 20
 #define TRUE 1
 #define FALSE 0
-#define EMPTY -1 //gia na doume an enas pinakas einai kenos i oxi|einai swsto i oxi?
+#define EMPTY -1 //gia na doume an enas pinakas einai kenos i oxi
 #define ValidB '*'
 
 typedef struct cacheBlock cacheBlock;
@@ -49,7 +49,7 @@ struct cacheBlock{
        int pins[openingSize];  //array gia pins
        int ID;  //anagnwristiko gia to block
        int fileNamePointer; //gia onoma arxeiou
-       int modified; //modified int gia 0 i 1
+       int modified; //modified gia 0 i 1
        char FileName[openingSize];//Onoma arxeiou
        long int timeStamp;
 

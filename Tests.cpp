@@ -8,14 +8,13 @@ char *test_string2 = "Department of Informatics and Telematics, Harokopio Univer
 int GetNthBlock(int file_desc, int n)
 {
 	int ret = BL_GetFirstBlock(file_desc);
-
 	if (ret < 0) return ret;
-
+    ret=ret-1;
 	for (int i=1; i<=n; i++)
 	{
 		ret = BL_GetNextBlock(file_desc, ret);
 	}
-
+     printf(" \n\tgetNext block returned: %d",ret);
 	return ret;
 }
 
@@ -45,7 +44,7 @@ int RunTest(TestFunc func, const char *test_name)
 			return 0;
 		}
 	}
-
+   
 	if (BL_CleanUp())
 	{
 		printf("Failed to deinitialize BL\n");
