@@ -37,7 +37,7 @@
 #define openingSize 20
 #define TRUE 1
 #define FALSE 0
-#define EMPTY -1 //gia na doume an enas pinakas einai kenos i oxi
+#define EMPTY -1  //gia na doume an enas pinakas einai kenos i oxi
 #define ValidB '*'
 
 typedef struct cacheBlock cacheBlock;
